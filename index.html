@@ -1,575 +1,734 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MANIKARNIKA — PDF Editor & Image Overlay Studio</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { background: #f1f5f9; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
-  header { background: linear-gradient(135deg, #0f172a, #1e3a8a); color: #fff; padding: 12px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.18); border-bottom: 3px solid #f59e0b; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .eagle-logo { width: 42px; height: 42px; border-radius: 50%; background: radial-gradient(circle, #1e293b, #090d16); border: 2px solid #fbbf24; box-shadow: 0 0 12px rgba(251, 191, 36, 0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .brand-text h1 { font-size: 19px; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(90deg, #fde68a, #f59e0b, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .brand-text span { font-size: 11px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.5px; display: block; }
-  .toolbar { background: #ffffff; padding: 12px 24px; border-bottom: 1px solid #cbd5e1; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .btn { padding: 8px 14px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
-  .btn-primary { background: #2563eb; color: #fff; }
-  .btn-primary:hover { background: #1d4ed8; }
-  .btn-success { background: #059669; color: #fff; }
-  .btn-success:hover { background: #047857; }
-  .btn-secondary { background: #e2e8f0; color: #334155; }
-  .btn-secondary:hover { background: #cbd5e1; }
-  .btn-gold { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
-  .btn-gold:hover { background: linear-gradient(135deg, #b45309, #92400e); }
-  .btn-danger { background: #dc2626; color: #fff; }
-  .btn-danger:hover { background: #b91c1c; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  input[type="file"] { display: none; }
-  .control-group { display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 5px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
-  .control-group input[type="text"], .control-group input[type="number"], .control-group input[type="color"] { padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; }
-  .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 24px; overflow: auto; }
-  .canvas-wrapper { position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background: #fff; border: 1px solid #94a3b8; display: inline-block; }
-  #pdfCanvas { display: block; }
-  #overlayLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-  .draggable-item { position: absolute; cursor: move; border: 1.5px dashed transparent; user-select: none; }
-  .draggable-item.active, .draggable-item:hover { border-color: #2563eb; background: rgba(37, 99, 235, 0.05); }
-  .draggable-item img { width: 100%; height: 100%; display: block; pointer-events: none; }
-  .draggable-text { padding: 3px 6px; white-space: pre-wrap; line-height: 1.25; min-width: 30px; min-height: 20px; border-radius: 3px; }
-  .draggable-text[contenteditable="true"] { cursor: text; background: rgba(255, 255, 255, 0.92); border: 1.5px solid #2563eb !important; outline: none; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
-  .resize-handle { position: absolute; width: 12px; height: 12px; background: #2563eb; border: 2px solid #fff; border-radius: 50%; bottom: -6px; right: -6px; cursor: nwse-resize; display: none; }
-  .draggable-item.active .resize-handle { display: block; }
-  .delete-badge { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; background: #dc2626; color: #fff; border-radius: 50%; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid #fff; z-index: 10; }
-  .draggable-item.active .delete-badge { display: flex; }
-  .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
-  .page-nav { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
-  .hint-bar { background: #eff6ff; color: #1e40af; font-size: 12px; padding: 6px 24px; border-bottom: 1px solid #bfdbfe; display: flex; justify-content: space-between; align-items: center; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUDHRA Solar - Customer Booking Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #f59e0b;
+      --primary-dark: #d97706;
+      --secondary: #0f172a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .header {
+      background: var(--secondary);
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .header img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      background: #ffffff;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .header h1 span {
+      color: var(--primary);
+    }
+
+    .header small {
+      color: #cbd5e1;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 28px auto 48px;
+      padding: 0 16px;
+    }
+
+    .form-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    .required-note {
+      margin: 0 0 16px;
+      font-size: 0.85rem;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .section-title {
+      margin: 22px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--primary);
+      font-size: 1.05rem;
+      color: var(--secondary);
+    }
+
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .form-group label .req {
+      color: #dc2626;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      background: #ffffff;
+    }
+
+    .form-group input[type="file"] {
+      padding: 7px;
+      background: #f8fafc;
+      font-size: 0.84rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-dark);
+    }
+
+    .submit-btn {
+      margin-top: 26px;
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: var(--secondary);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    .submit-btn:disabled {
+      background: #94a3b8;
+      color: #ffffff;
+      cursor: wait;
+    }
+
+    .status-box {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .status-box.error {
+      display: block;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+
+    .receipt-actions {
+      margin-top: 12px;
+      display: none;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .receipt-btn {
+      padding: 10px 16px;
+      background: var(--secondary);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .receipt-btn:hover {
+      background: #1e293b;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">
-    <div class="eagle-logo" title="MANIKARNIKA Eagle Emblem">
-      <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M32 6C27 12 25 18 27 23L10 15C13 23 19 28 25 30L14 35C20 38 26 38 30 36L28 54L32 50L36 54L34 36C38 38 44 38 50 35L39 30C45 28 51 23 54 15L37 23C39 18 37 12 32 6Z" fill="url(#goldGrad)" stroke="#fef08a" stroke-width="1.5"/>
-        <circle cx="32" cy="17" r="2.2" fill="#0f172a"/>
-        <defs>
-          <linearGradient id="goldGrad" x1="10" y1="6" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#FDE047"/>
-            <stop offset="0.5" stop-color="#F59E0B"/>
-            <stop offset="1" stop-color="#B45309"/>
-          </linearGradient>
-        </defs>
-      </svg>
+  <header class="header">
+    <img id="brandLogo" src="rudhralogo.jpeg" alt="RUDHRA Logo" />
+    <div>
+      <h1><span>RUDHRA</span> SOLAR BOOKING FORM</h1>
+      <small>Submit Rooftop Solar Booking Details &amp; Documents</small>
     </div>
-    <div class="brand-text">
-      <h1>MANIKARNIKA</h1>
-      <span>PDF Editor & Image Overlay Studio</span>
-    </div>
-  </div>
-  <div class="page-nav">
-    <button class="btn btn-secondary" id="prevPageBtn" onclick="changePage(-1)" disabled>◀ Prev</button>
-    <span id="pageIndicator">Page 0 / 0</span>
-    <button class="btn btn-secondary" id="nextPageBtn" onclick="changePage(1)" disabled>Next ▶</button>
-  </div>
-</header>
+  </header>
 
-<div class="toolbar">
-  <label class="btn btn-primary">
-    📂 Upload PDF
-    <input type="file" id="pdfUpload" accept="application/pdf" onchange="handlePdfUpload(event)">
-  </label>
+  <main class="container">
+    <form class="form-card" id="bookingForm">
+      <div class="required-note">All fields and document uploads marked with * are mandatory.</div>
 
-  <label class="btn btn-secondary" id="imgUploadLabel" style="opacity:0.5; pointer-events:none;">
-    🖼️ Put Image / Sign
-    <input type="file" id="imgUpload" accept="image/png, image/jpeg" onchange="handleImageUpload(event)">
-  </label>
+      <h2 class="section-title">Booking &amp; Customer Details</h2>
+      <div class="grid">
+        <div class="form-group">
+          <label for="capacity">Capacity <span class="req">*</span></label>
+          <select id="capacity" required>
+            <option value="">-- Select Capacity --</option>
+            <option value="3kW">3 kW</option>
+            <option value="5kW">5 kW</option>
+            <option value="10kW">10 kW</option>
+            <option value="15kW">15 kW</option>
+            <option value="20kW">20 kW</option>
+            <option value="30kW">30 kW</option>
+            <option value="50kW">50 kW</option>
+          </select>
+        </div>
 
-  <button class="btn btn-gold" id="stampEagleBtn" onclick="insertManikarnikaStamp()" disabled title="Insert MANIKARNIKA Eagle Seal">
-    🦅 Stamp MANIKARNIKA
-  </button>
+        <div class="form-group">
+          <label for="agent_name">Agent Name <span class="req">*</span></label>
+          <select id="agent_name" required>
+            <option value="">-- Select Agent --</option>
+            <option value="RAVI">RAVI</option>
+            <option value="RAGAVENDRA">RAGAVENDRA</option>
+            <option value="SANTHOS">SANTHOS</option>
+            <option value="ASHOK">ASHOK</option>
+            <option value="ANIL">ANIL</option>
+          </select>
+        </div>
 
-  <div class="control-group">
-    <input type="text" id="textInput" placeholder="Enter text to add..." style="width:160px;" onkeydown="if(event.key==='Enter') addTextOverlay()">
-    <input type="number" id="fontSizeInput" value="18" min="8" max="120" style="width:55px;" title="Font Size" onchange="updateSelectedTextStyle()">
-    <input type="color" id="textColorInput" value="#000000" title="Text Color" onchange="updateSelectedTextStyle()">
-    <button class="btn btn-secondary" id="addTextBtn" onclick="addTextOverlay()" disabled>➕ Add Text</button>
-  </div>
+        <div class="form-group">
+          <label for="full_name">Full Name <span class="req">*</span></label>
+          <input type="text" id="full_name" required placeholder="Enter full name" />
+        </div>
 
-  <button class="btn btn-danger" id="clearPageBtn" onclick="clearCurrentPageOverlays()" disabled>🗑️ Clear Page</button>
-  <button class="btn btn-success" id="exportPdfBtn" onclick="exportEditedPdf()" disabled style="margin-left:auto;">📥 Download Edited PDF</button>
-</div>
+        <div class="form-group">
+          <label for="mobile_no">Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="mobile_no" required pattern="[0-9]{10}" maxlength="10" title="Enter a valid 10-digit mobile number" placeholder="10-digit mobile number" />
+        </div>
 
-<div class="hint-bar">
-  <span>💡 <b>Tip:</b> Click any text or image to drag & move. <b>Double-click</b> any text on the PDF to edit it directly inline!</span>
-  <span>MANIKARNIKA PORTAL</span>
-</div>
+        <div class="form-group">
+          <label for="email_id">Email ID <span class="req">*</span></label>
+          <input type="email" id="email_id" required placeholder="Enter email address" />
+        </div>
 
-<div class="workspace">
-  <div id="emptyState" class="empty-state">
-    <h2>No PDF Loaded</h2>
-    <p style="margin-top:8px;">Click <b>Upload PDF</b> above to open a document, place images/signatures, add or edit text inline, and export.</p>
-  </div>
-  <div class="canvas-wrapper" id="canvasWrapper" style="display:none;">
-    <canvas id="pdfCanvas"></canvas>
-    <div id="overlayLayer" onclick="deselectAll(event)"></div>
-  </div>
-</div>
+        <div class="form-group">
+          <label for="electricity_consumer_no">Electricity Consumer No <span class="req">*</span></label>
+          <input type="text" id="electricity_consumer_no" required placeholder="Enter consumer number" />
+        </div>
+      </div>
 
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      <h2 class="section-title">Address Details</h2>
+      <div class="grid">
+        <div class="form-group">
+          <label for="house_no">House No <span class="req">*</span></label>
+          <input type="text" id="house_no" required placeholder="House / Door No" />
+        </div>
 
-  let pdfBytes = null;
-  let pdfJsDoc = null;
-  let currentPage = 1;
-  let totalPages = 0;
-  let renderScale = 1.5;
-  let overlaysByPage = {};
-  let activeOverlayId = null;
-  let editingOverlayId = null;
+        <div class="form-group">
+          <label for="village">Village / Town <span class="req">*</span></label>
+          <input type="text" id="village" required placeholder="Village or town" />
+        </div>
 
-  async function handlePdfUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const arrayBuffer = await file.arrayBuffer();
-    pdfBytes = new Uint8Array(arrayBuffer);
-    pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice() }).promise;
-    totalPages = pdfJsDoc.numPages;
-    currentPage = 1;
-    overlaysByPage = {};
-    for (let i = 1; i <= totalPages; i++) overlaysByPage[i] = [];
+        <div class="form-group">
+          <label for="mandal">Mandal <span class="req">*</span></label>
+          <input type="text" id="mandal" required placeholder="Mandal" />
+        </div>
 
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('canvasWrapper').style.display = 'inline-block';
-    document.getElementById('imgUploadLabel').style.opacity = '1';
-    document.getElementById('imgUploadLabel').style.pointerEvents = 'auto';
-    document.getElementById('stampEagleBtn').disabled = false;
-    document.getElementById('addTextBtn').disabled = false;
-    document.getElementById('clearPageBtn').disabled = false;
-    document.getElementById('exportPdfBtn').disabled = false;
+        <div class="form-group">
+          <label for="district">District <span class="req">*</span></label>
+          <input type="text" id="district" required placeholder="District" />
+        </div>
 
-    await renderPage(currentPage);
-  }
+        <div class="form-group">
+          <label for="state">State <span class="req">*</span></label>
+          <input type="text" id="state" required placeholder="State" />
+        </div>
 
-  async function renderPage(pageNum) {
-    const page = await pdfJsDoc.getPage(pageNum);
-    const viewport = page.getViewport({ scale: renderScale });
-    const canvas = document.getElementById('pdfCanvas');
-    const ctx = canvas.getContext('2d');
+        <div class="form-group">
+          <label for="pincode">PIN Code <span class="req">*</span></label>
+          <input type="text" id="pincode" required pattern="[0-9]{6}" maxlength="6" title="Enter a valid 6-digit PIN code" placeholder="6-digit PIN code" />
+        </div>
+      </div>
 
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+      <h2 class="section-title">KYC &amp; Bank Details</h2>
+      <div class="grid">
+        <div class="form-group">
+          <label for="aadhar_no">Aadhar Number <span class="req">*</span></label>
+          <input type="text" id="aadhar_no" required pattern="[0-9]{12}" maxlength="12" title="Enter a valid 12-digit Aadhar number" placeholder="12-digit Aadhar number" />
+        </div>
 
-    const overlayLayer = document.getElementById('overlayLayer');
-    overlayLayer.style.width = viewport.width + 'px';
-    overlayLayer.style.height = viewport.height + 'px';
+        <div class="form-group">
+          <label for="pan_no">PAN Number <span class="req">*</span></label>
+          <input type="text" id="pan_no" required maxlength="10" style="text-transform: uppercase;" placeholder="Enter PAN number" />
+        </div>
 
-    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        <div class="form-group">
+          <label for="bank_ac_no">Bank Account No <span class="req">*</span></label>
+          <input type="text" id="bank_ac_no" required placeholder="Enter bank account number" />
+        </div>
 
-    document.getElementById('pageIndicator').innerText = `Page ${currentPage} / ${totalPages}`;
-    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+        <div class="form-group">
+          <label for="ifsc_code">IFSC Code <span class="req">*</span></label>
+          <input type="text" id="ifsc_code" required maxlength="11" style="text-transform: uppercase;" placeholder="Enter IFSC code" />
+        </div>
+      </div>
 
-    renderOverlays();
-  }
+      <h2 class="section-title">Upload Documents &amp; Signature</h2>
+      <div class="grid">
+        <div class="form-group">
+          <label for="aadhar_doc">Aadhar Document <span class="req">*</span></label>
+          <input type="file" id="aadhar_doc" required accept="image/*,.pdf" />
+        </div>
 
-  async function changePage(delta) {
-    const next = currentPage + delta;
-    if (next >= 1 && next <= totalPages) {
-      currentPage = next;
-      activeOverlayId = null;
-      editingOverlayId = null;
-      await renderPage(currentPage);
+        <div class="form-group">
+          <label for="pan_doc">PAN Document <span class="req">*</span></label>
+          <input type="file" id="pan_doc" required accept="image/*,.pdf" />
+        </div>
+
+        <div class="form-group">
+          <label for="bank_doc">Bank Proof (Passbook / Cheque) <span class="req">*</span></label>
+          <input type="file" id="bank_doc" required accept="image/*,.pdf" />
+        </div>
+
+        <div class="form-group">
+          <label for="site_photo">Site Photo <span class="req">*</span></label>
+          <input type="file" id="site_photo" required accept="image/*" />
+        </div>
+
+        <div class="form-group">
+          <label for="house_tax_doc">House Tax Document <span class="req">*</span></label>
+          <input type="file" id="house_tax_doc" required accept="image/*,.pdf" />
+        </div>
+
+        <div class="form-group">
+          <label for="customer_sign_doc">Customer Signature <span class="req">*</span></label>
+          <input type="file" id="customer_sign_doc" required accept="image/*,.pdf" />
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">SUBMIT BOOKING &amp; DOWNLOAD RECEIPT</button>
+      <div class="status-box" id="statusBox" role="status"></div>
+      <div class="receipt-actions" id="receiptActions">
+        <button type="button" class="receipt-btn" id="reDownloadBtn">Download Receipt Again (PDF)</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://gzqevoudbwttcdeglish.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ySvuOYNcs37aTcyYjJW76Q_cWF5x0qN';
+    const STORAGE_BUCKET = 'rudhra-docs';
+    const BOOKINGS_TABLE = 'rudhra_solar_bookings';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const UPLOAD_MAP = [
+      { inputId: 'aadhar_doc', column: 'aadhar_doc_url', folder: 'aadhar', label: 'Aadhar Document' },
+      { inputId: 'pan_doc', column: 'pan_doc_url', folder: 'pan', label: 'PAN Document' },
+      { inputId: 'bank_doc', column: 'bank_doc_url', folder: 'bank', label: 'Bank Proof' },
+      { inputId: 'site_photo', column: 'site_photo_url', folder: 'site', label: 'Site Photo' },
+      { inputId: 'house_tax_doc', column: 'house_tax_doc_url', folder: 'house_tax', label: 'House Tax Document' },
+      { inputId: 'customer_sign_doc', column: 'customer_sign_url', folder: 'customer_sign', label: 'Customer Signature' }
+    ];
+
+    let lastSubmittedReceiptData = null;
+
+    function showStatus(message, type) {
+      const box = document.getElementById('statusBox');
+      if (!message) {
+        box.style.display = 'none';
+        box.textContent = '';
+        box.className = 'status-box';
+        return;
+      }
+      box.textContent = message;
+      box.className = `status-box ${type}`;
+      box.style.display = 'block';
     }
-  }
 
-  function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file || !pdfJsDoc) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = new Image();
-      img.onload = function() {
-        const maxW = 180;
-        const ratio = img.height / img.width;
-        const w = Math.min(img.width, maxW);
-        const h = w * ratio;
-
-        const item = {
-          id: 'ov_' + Date.now(),
-          type: 'image',
-          x: 50,
-          y: 50,
-          width: w,
-          height: h,
-          src: e.target.result,
-          mimeType: file.type
-        };
-        overlaysByPage[currentPage].push(item);
-        activeOverlayId = item.id;
-        editingOverlayId = null;
-        renderOverlays();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-    event.target.value = '';
-  }
-
-  function insertManikarnikaStamp() {
-    if (!pdfJsDoc) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = 240;
-    canvas.height = 240;
-    const ctx = canvas.getContext('2d');
-
-    // Outer dark circular badge
-    ctx.beginPath();
-    ctx.arc(120, 120, 112, 0, Math.PI * 2);
-    ctx.fillStyle = '#0f172a';
-    ctx.fill();
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.stroke();
-
-    // Inner gold ring
-    ctx.beginPath();
-    ctx.arc(120, 120, 100, 0, Math.PI * 2);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#fde047';
-    ctx.stroke();
-
-    // Stylized Golden Eagle Emblem
-    ctx.save();
-    ctx.translate(120, 95);
-    ctx.fillStyle = '#fbbf24';
-    ctx.beginPath();
-    ctx.moveTo(0, -45);
-    ctx.lineTo(-14, -15);
-    ctx.lineTo(-65, -30);
-    ctx.lineTo(-22, 5);
-    ctx.lineTo(-48, 22);
-    ctx.lineTo(-10, 16);
-    ctx.lineTo(-14, 48);
-    ctx.lineTo(0, 38);
-    ctx.lineTo(14, 48);
-    ctx.lineTo(10, 16);
-    ctx.lineTo(48, 22);
-    ctx.lineTo(22, 5);
-    ctx.lineTo(65, -30);
-    ctx.lineTo(14, -15);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // MANIKARNIKA Text
-    ctx.fillStyle = '#fde047';
-    ctx.font = 'bold 22px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('MANIKARNIKA', 120, 178);
-
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px Arial';
-    ctx.fillText('VERIFIED SEAL', 120, 196);
-
-    const pngUrl = canvas.toDataURL('image/png');
-    const item = {
-      id: 'ov_' + Date.now(),
-      type: 'image',
-      x: 70,
-      y: 70,
-      width: 110,
-      height: 110,
-      src: pngUrl,
-      mimeType: 'image/png'
-    };
-    overlaysByPage[currentPage].push(item);
-    activeOverlayId = item.id;
-    editingOverlayId = null;
-    renderOverlays();
-  }
-
-  function addTextOverlay() {
-    const textVal = document.getElementById('textInput').value.trim();
-    if (!textVal || !pdfJsDoc) return;
-    const fontSize = parseInt(document.getElementById('fontSizeInput').value, 10) || 18;
-    const color = document.getElementById('textColorInput').value || '#000000';
-
-    const item = {
-      id: 'ov_' + Date.now(),
-      type: 'text',
-      x: 60,
-      y: 60,
-      text: textVal,
-      fontSize: fontSize,
-      color: color
-    };
-    overlaysByPage[currentPage].push(item);
-    activeOverlayId = item.id;
-    editingOverlayId = null;
-    document.getElementById('textInput').value = '';
-    renderOverlays();
-  }
-
-  function updateSelectedTextStyle() {
-    if (!activeOverlayId || !overlaysByPage[currentPage]) return;
-    const item = overlaysByPage[currentPage].find(i => i.id === activeOverlayId);
-    if (item && item.type === 'text') {
-      item.fontSize = parseInt(document.getElementById('fontSizeInput').value, 10) || 18;
-      item.color = document.getElementById('textColorInput').value || '#000000';
-      renderOverlays();
+    async function loadLogoDataUrl() {
+      try {
+        const res = await fetch('rudhralogo.jpeg');
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        return await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+      } catch (_) {
+        return null;
+      }
     }
-  }
 
-  function syncToolbarWithSelected(item) {
-    if (item && item.type === 'text') {
-      document.getElementById('fontSizeInput').value = item.fontSize;
-      document.getElementById('textColorInput').value = item.color;
-    }
-  }
+    async function generateAndDownloadReceipt(bookingData) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const margin = 14;
+      const contentWidth = pageWidth - margin * 2;
 
-  function renderOverlays() {
-    const layer = document.getElementById('overlayLayer');
-    layer.innerHTML = '';
-    const items = overlaysByPage[currentPage] || [];
+      // Top Brand Banner
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, pageWidth, 38, 'F');
 
-    items.forEach(item => {
-      const el = document.createElement('div');
-      el.className = 'draggable-item' + (item.id === activeOverlayId ? ' active' : '');
-      el.style.left = item.x + 'px';
-      el.style.top = item.y + 'px';
+      // Accent Stripe
+      doc.setFillColor(245, 158, 11);
+      doc.rect(0, 38, pageWidth, 2.5, 'F');
 
-      if (item.type === 'image') {
-        el.style.width = item.width + 'px';
-        el.style.height = item.height + 'px';
-        const img = document.createElement('img');
-        img.src = item.src;
-        el.appendChild(img);
-
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = 'resize-handle';
-        resizeHandle.onmousedown = (e) => startResize(e, item);
-        el.appendChild(resizeHandle);
-      } else if (item.type === 'text') {
-        el.classList.add('draggable-text');
-        el.style.fontSize = item.fontSize + 'px';
-        el.style.color = item.color;
-        el.style.fontWeight = 'bold';
-        el.innerText = item.text;
-
-        if (editingOverlayId === item.id) {
-          el.contentEditable = 'true';
-          setTimeout(() => {
-            el.focus();
-            const range = document.createRange();
-            range.selectNodeContents(el);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-          }, 0);
-        }
-
-        el.ondblclick = (e) => {
-          e.stopPropagation();
-          editingOverlayId = item.id;
-          activeOverlayId = item.id;
-          renderOverlays();
-        };
-
-        el.oninput = () => {
-          item.text = el.innerText;
-        };
-
-        el.onblur = () => {
-          if (editingOverlayId === item.id) {
-            item.text = el.innerText.trim() || 'Text';
-            editingOverlayId = null;
-            renderOverlays();
-          }
-        };
-
-        el.onkeydown = (e) => {
-          if (e.key === 'Escape') {
-            el.blur();
-          }
-        };
+      // Optional Company Logo
+      const logoDataUrl = await loadLogoDataUrl();
+      let textStartX = margin;
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, 'JPEG', margin, 6, 25, 25);
+          textStartX = margin + 30;
+        } catch (_) {}
       }
 
-      const delBtn = document.createElement('div');
-      delBtn.className = 'delete-badge';
-      delBtn.innerText = '×';
-      delBtn.onmousedown = (e) => e.stopPropagation();
-      delBtn.onclick = (e) => {
-        e.stopPropagation();
-        deleteOverlay(item.id);
-      };
-      el.appendChild(delBtn);
+      doc.setTextColor(245, 158, 11);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(17);
+      doc.text('M/s. SRI RUDHRA SOLAR SOLUTIONS', textStartX, 15);
 
-      el.onmousedown = (e) => {
-        if (editingOverlayId === item.id) return;
-        startDrag(e, item);
+      doc.setTextColor(226, 232, 240);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.8);
+      doc.text('HNO: 1-7-28/12/1, Near SBI Bank, Narsampeta Main Road,', textStartX, 21.5);
+      doc.text('Dist: Mahabubabad - 506101, Telangana | PM - Surya Ghar: Muft Bijli Yojana', textStartX, 26.8);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('SOLAR BOOKING ACKNOWLEDGEMENT RECEIPT', textStartX, 33.5);
+
+      // Receipt Meta Bar
+      let y = 47;
+      doc.setFillColor(241, 245, 249);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(margin, y, contentWidth, 16, 2, 2, 'FD');
+
+      const receiptNo = bookingData.receipt_no || `RSS-${Date.now().toString().slice(-8)}`;
+      const submittedAt = bookingData.submitted_at || new Date().toLocaleString('en-IN');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Receipt / Ref No: ${receiptNo}`, margin + 4, y + 6.5);
+      doc.text(`Status: ${bookingData.status || 'Pending'}`, pageWidth - margin - 4, y + 6.5, { align: 'right' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Date & Time: ${submittedAt}`, margin + 4, y + 12.5);
+      doc.text(`Assigned Agent: ${bookingData.agent_name}`, pageWidth - margin - 4, y + 12.5, { align: 'right' });
+
+      y += 23;
+
+      const drawSectionHeader = (title) => {
+        doc.setFillColor(15, 23, 42);
+        doc.rect(margin, y, contentWidth, 7.5, 'F');
+        doc.setTextColor(245, 158, 11);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.8);
+        doc.text(title, margin + 3.5, y + 5.2);
+        y += 7.5;
       };
-      layer.appendChild(el);
+
+      const drawRow = (label, value, isAlt = false) => {
+        const displayValue = String(value || 'N/A');
+        const wrappedLines = doc.splitTextToSize(displayValue, contentWidth - 68);
+        const rowHeight = Math.max(7.5, wrappedLines.length * 4.8 + 3);
+
+        doc.setFillColor(isAlt ? 248 : 255, isAlt ? 250 : 255, isAlt ? 252 : 255);
+        doc.setDrawColor(226, 232, 240);
+        doc.rect(margin, y, contentWidth, rowHeight, 'FD');
+
+        doc.setTextColor(51, 65, 85);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.2);
+        doc.text(label, margin + 3.5, y + 5);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'normal');
+        doc.text(wrappedLines, margin + 65, y + 5);
+
+        y += rowHeight;
+      };
+
+      // Section 1: Customer & Solar System Details
+      drawSectionHeader('1. CUSTOMER & SYSTEM BOOKING DETAILS');
+      drawRow('Customer Full Name', bookingData.full_name, false);
+      drawRow('Mobile Number', bookingData.mobile_no, true);
+      drawRow('Email ID', bookingData.email_id, false);
+      drawRow('Selected Plant Capacity', bookingData.capacity, true);
+      drawRow('Electricity Consumer No.', bookingData.electricity_consumer_no, false);
+      drawRow('Assigned Executive / Agent', bookingData.agent_name, true);
+
+      y += 5;
+
+      // Section 2: Installation Address
+      drawSectionHeader('2. INSTALLATION SITE ADDRESS');
+      const fullAddress = `${bookingData.house_no}, ${bookingData.village}, Mandal: ${bookingData.mandal}, Dist: ${bookingData.district}, ${bookingData.state} - ${bookingData.pincode}`;
+      drawRow('Complete Address', fullAddress, false);
+
+      y += 5;
+
+      // Section 3: KYC & Bank Details
+      drawSectionHeader('3. KYC & BANK ACCOUNT DETAILS');
+      drawRow('Aadhar Number', bookingData.aadhar_no, false);
+      drawRow('PAN Number', bookingData.pan_no, true);
+      drawRow('Bank Account Number', bookingData.bank_ac_no, false);
+      drawRow('IFSC Code', bookingData.ifsc_code, true);
+
+      y += 5;
+
+      // Section 4: Uploaded Documents Checklist
+      drawSectionHeader('4. SUBMITTED DOCUMENTS VERIFICATION');
+      const docsSummary = [
+        ['Aadhar Card Document', bookingData.aadhar_doc_url ? 'Uploaded & Attached' : 'Missing'],
+        ['PAN Card Document', bookingData.pan_doc_url ? 'Uploaded & Attached' : 'Missing'],
+        ['Bank Proof Document', bookingData.bank_doc_url ? 'Uploaded & Attached' : 'Missing'],
+        ['Site Installation Photo', bookingData.site_photo_url ? 'Uploaded & Attached' : 'Missing'],
+        ['House Tax Document', bookingData.house_tax_doc_url ? 'Uploaded & Attached' : 'Missing'],
+        ['Customer Signature', bookingData.customer_sign_url ? 'Uploaded & Attached' : 'Missing']
+      ];
+
+      docsSummary.forEach(([docName, statusText], idx) => {
+        drawRow(docName, statusText, idx % 2 === 1);
+      });
+
+      // Footer / Acknowledgement Box
+      y += 8;
+      doc.setDrawColor(203, 213, 225);
+      doc.setFillColor(254, 249, 195);
+      doc.roundedRect(margin, y, contentWidth, 16, 2, 2, 'FD');
+      doc.setTextColor(113, 63, 18);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.8);
+      doc.text('Note:', margin + 4, y + 6);
+      doc.setFont('helvetica', 'normal');
+      doc.text(
+        'This is a system-generated booking receipt from M/s. SRI RUDHRA SOLAR SOLUTIONS. Please retain this receipt for future correspondence and subsidy processing.',
+        margin + 14,
+        y + 6,
+        { maxWidth: contentWidth - 18 }
+      );
+
+      // Bottom Signature Line
+      const footerY = 282;
+      doc.setDrawColor(148, 163, 184);
+      doc.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(8.5);
+      doc.text('Authorized Signatory - Sri Rudhra Solar Solutions', margin, footerY);
+      doc.text('Generated Automatically upon Submission', pageWidth - margin, footerY, { align: 'right' });
+
+      const safeName = (bookingData.full_name || 'Customer').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+      doc.save(`RUDHRA_Receipt_${safeName}.pdf`);
+    }
+
+    async function uploadFileToBucket(file, folder) {
+      const ext = (file.name.split('.').pop() || 'bin').replace(/[^a-zA-Z0-9]/g, '');
+      const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabaseClient.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, file, { upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabaseClient.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(path);
+
+      return { path, publicUrl: data.publicUrl };
+    }
+
+    document.getElementById('reDownloadBtn').addEventListener('click', () => {
+      if (lastSubmittedReceiptData) {
+        generateAndDownloadReceipt(lastSubmittedReceiptData);
+      }
     });
-  }
 
-  function deselectAll(e) {
-    if (e.target.id === 'overlayLayer') {
-      activeOverlayId = null;
-      editingOverlayId = null;
-      renderOverlays();
-    }
-  }
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-  function deleteOverlay(id) {
-    overlaysByPage[currentPage] = overlaysByPage[currentPage].filter(i => i.id !== id);
-    if (activeOverlayId === id) activeOverlayId = null;
-    if (editingOverlayId === id) editingOverlayId = null;
-    renderOverlays();
-  }
+      const form = e.target;
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
 
-  function clearCurrentPageOverlays() {
-    overlaysByPage[currentPage] = [];
-    activeOverlayId = null;
-    editingOverlayId = null;
-    renderOverlays();
-  }
-
-  function startDrag(e, item) {
-    if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-badge')) return;
-    e.stopPropagation();
-    activeOverlayId = item.id;
-    editingOverlayId = null;
-    syncToolbarWithSelected(item);
-    renderOverlays();
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origX = item.x;
-    const origY = item.y;
-
-    function onMouseMove(moveEvent) {
-      item.x = origX + (moveEvent.clientX - startX);
-      item.y = origY + (moveEvent.clientY - startY);
-      renderOverlays();
-    }
-
-    function onMouseUp() {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  }
-
-  function startResize(e, item) {
-    e.stopPropagation();
-    const startX = e.clientX;
-    const origW = item.width;
-    const origH = item.height;
-    const aspect = origH / origW;
-
-    function onMouseMove(moveEvent) {
-      const newW = Math.max(20, origW + (moveEvent.clientX - startX));
-      item.width = newW;
-      item.height = newW * aspect;
-      renderOverlays();
-    }
-
-    function onMouseUp() {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  }
-
-  function hexToRgb(hex) {
-    const bigint = parseInt(hex.slice(1), 16);
-    const r = ((bigint >> 16) & 255) / 255;
-    const g = ((bigint >> 8) & 255) / 255;
-    const b = (bigint & 255) / 255;
-    return PDFLib.rgb(r, g, b);
-  }
-
-  async function exportEditedPdf() {
-    if (!pdfBytes) return;
-    const exportBtn = document.getElementById('exportPdfBtn');
-    exportBtn.disabled = true;
-    exportBtn.innerText = '⏳ Exporting...';
-
-    try {
-      const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-      const helveticaFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-      const pages = pdfDoc.getPages();
-
-      for (let p = 1; p <= totalPages; p++) {
-        const items = overlaysByPage[p] || [];
-        if (items.length === 0) continue;
-
-        const page = pages[p - 1];
-        const { width: pdfW, height: pdfH } = page.getSize();
-        const scaleFactor = 1 / renderScale;
-
-        for (const item of items) {
-          const pdfX = item.x * scaleFactor;
-          if (item.type === 'image') {
-            const pdfW_img = item.width * scaleFactor;
-            const pdfH_img = item.height * scaleFactor;
-            const pdfY = pdfH - (item.y * scaleFactor) - pdfH_img;
-
-            let embeddedImg;
-            if (item.mimeType === 'image/png') {
-              embeddedImg = await pdfDoc.embedPng(item.src);
-            } else {
-              embeddedImg = await pdfDoc.embedJpg(item.src);
-            }
-            page.drawImage(embeddedImg, {
-              x: pdfX,
-              y: pdfY,
-              width: pdfW_img,
-              height: pdfH_img
-            });
-          } else if (item.type === 'text') {
-            const scaledFontSize = item.fontSize * scaleFactor;
-            const lines = item.text.split('\n');
-            lines.forEach((line, idx) => {
-              const lineOffset = idx * (scaledFontSize * 1.25);
-              const pdfY = pdfH - (item.y * scaleFactor) - scaledFontSize - lineOffset;
-              page.drawText(line, {
-                x: pdfX + 3,
-                y: pdfY,
-                size: scaledFontSize,
-                font: helveticaFont,
-                color: hexToRgb(item.color)
-              });
-            });
+      // Extra strict check to ensure every single input & file is provided
+      const allRequiredFields = form.querySelectorAll('input[required], select[required]');
+      for (const field of allRequiredFields) {
+        if (field.type === 'file') {
+          if (!field.files || field.files.length === 0) {
+            showStatus('Please upload all required documents and customer signature before submitting.', 'error');
+            field.focus();
+            return;
           }
+        } else if (!field.value || !field.value.trim()) {
+          showStatus('Please fill in all mandatory fields before submitting.', 'error');
+          field.focus();
+          return;
         }
       }
 
-      const modifiedPdfBytes = await pdfDoc.save();
-      const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'MANIKARNIKA_edited_' + Date.now() + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err) {
-      alert('Error generating PDF: ' + err.message);
-    }
+      const submitBtn = document.getElementById('submitBtn');
+      const receiptActions = document.getElementById('receiptActions');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading Documents & Generating Receipt...';
+      receiptActions.style.display = 'none';
+      showStatus('', '');
 
-    exportBtn.disabled = false;
-    exportBtn.innerText = '📥 Download Edited PDF';
-  }
-</script>
+      const uploadedPaths = [];
+
+      try {
+        const docUrls = {};
+
+        for (const item of UPLOAD_MAP) {
+          const input = document.getElementById(item.inputId);
+          const file = input.files[0];
+          const uploaded = await uploadFileToBucket(file, item.folder);
+          uploadedPaths.push(uploaded.path);
+          docUrls[item.column] = uploaded.publicUrl;
+        }
+
+        const payload = {
+          capacity: document.getElementById('capacity').value,
+          agent_name: document.getElementById('agent_name').value,
+          full_name: document.getElementById('full_name').value.trim(),
+          mobile_no: document.getElementById('mobile_no').value.trim(),
+          email_id: document.getElementById('email_id').value.trim(),
+          house_no: document.getElementById('house_no').value.trim(),
+          village: document.getElementById('village').value.trim(),
+          mandal: document.getElementById('mandal').value.trim(),
+          pincode: document.getElementById('pincode').value.trim(),
+          district: document.getElementById('district').value.trim(),
+          state: document.getElementById('state').value.trim(),
+          aadhar_no: document.getElementById('aadhar_no').value.trim(),
+          electricity_consumer_no: document.getElementById('electricity_consumer_no').value.trim(),
+          bank_ac_no: document.getElementById('bank_ac_no').value.trim(),
+          ifsc_code: document.getElementById('ifsc_code').value.trim().toUpperCase(),
+          pan_no: document.getElementById('pan_no').value.trim().toUpperCase(),
+          aadhar_doc_url: docUrls.aadhar_doc_url,
+          pan_doc_url: docUrls.pan_doc_url,
+          bank_doc_url: docUrls.bank_doc_url,
+          site_photo_url: docUrls.site_photo_url,
+          house_tax_doc_url: docUrls.house_tax_doc_url,
+          customer_sign_url: docUrls.customer_sign_url,
+          status: 'Pending'
+        };
+
+        const { data: insertedRows, error: insertError } = await supabaseClient
+          .from(BOOKINGS_TABLE)
+          .insert([payload])
+          .select();
+
+        if (insertError) throw insertError;
+
+        const savedRecord = (insertedRows && insertedRows[0]) || payload;
+        lastSubmittedReceiptData = {
+          ...savedRecord,
+          receipt_no: savedRecord.id
+            ? `RSS-${String(savedRecord.id).slice(0, 8).toUpperCase()}`
+            : `RSS-${Date.now().toString().slice(-8)}`,
+          submitted_at: savedRecord.created_at
+            ? new Date(savedRecord.created_at).toLocaleString('en-IN')
+            : new Date().toLocaleString('en-IN')
+        };
+
+        await generateAndDownloadReceipt(lastSubmittedReceiptData);
+
+        form.reset();
+        showStatus('Booking submitted successfully! Your acknowledgement receipt PDF has been downloaded automatically.', 'success');
+        receiptActions.style.display = 'flex';
+      } catch (err) {
+        if (uploadedPaths.length > 0) {
+          await supabaseClient.storage.from(STORAGE_BUCKET).remove(uploadedPaths).catch(() => {});
+        }
+        showStatus(`Submission failed: ${err.message}`, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'SUBMIT BOOKING & DOWNLOAD RECEIPT';
+      }
+    });
+  </script>
+ <script>
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    document.addEventListener("keydown", function(e) {
+        if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey &&
+            ["I", "J", "C"].includes(e.key.toUpperCase())) ||
+            (e.ctrlKey && e.key.toUpperCase() === "U")
+        ) {
+            e.preventDefault();
+        }
+    });
+    </script>
+<script src="database_script.js"></script>
 </body>
 </html>
